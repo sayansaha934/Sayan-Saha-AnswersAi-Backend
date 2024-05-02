@@ -1,5 +1,5 @@
 const { getUserProfile } = require('../user/controller');
-const User = require('../user/model');
+const {User} = require('../user/model');
 
 jest.mock('../user/model');
 

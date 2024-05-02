@@ -12,4 +12,12 @@ const userSchema = new mongoose.Schema(
 
 const User = mongoose.model("User", userSchema);
 
-module.exports = User;
+
+const invalidatedTokenSchema = new mongoose.Schema({
+    token: { type: String, required: true },
+    expiresAt: { type: Date, required: true, index: { expires: 0 } }
+});
+
+const InvalidatedToken = mongoose.model('InvalidatedToken', invalidatedTokenSchema);
+
+module.exports = { User, InvalidatedToken };

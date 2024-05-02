@@ -1,5 +1,5 @@
 const { signUp } = require('../user/controller');
-const User = require('../user/model');
+const {User} = require('../user/model');
 const bcrypt = require('bcryptjs');
 
 jest.mock('../user/model');

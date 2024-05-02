@@ -1,7 +1,7 @@
 
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const User = require("./model");
+const { User, InvalidatedToken } = require("./model");
 
 
 const SECRET_KEY = "0SjSLEqrPSUTdgyJzPDHspeQdRCA9X";
@@ -80,9 +80,7 @@ const getUserProfile = async (req, res) => {
 }
 const logout = async (req, res) => {
   try {
-    // For a basic logout, you can simply invalidate the token on the client side.
-    // There's no need for server-side actions for token invalidation.
-
+    await invalidateToken(req)
     res.json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -93,7 +91,7 @@ const refreshToken = async (req, res) => {
   try {
     // Extract the email and user id from the decoded token
     const { email, id } = req.user;
-
+    await invalidateToken(req)
     // Generate a new token with the same payload (email and id) but with a new expiration time
     const newToken = jwt.sign({ email, id }, SECRET_KEY, { expiresIn: "24h" });
 
@@ -103,12 +101,21 @@ const refreshToken = async (req, res) => {
   }
 };
 
-
-function verifyToken(req, res, next) {
+const invalidateToken = async (req) => {
+  const token = req.headers["authorization"];
+  const exp = new Date(req.user.exp * 1000)
+  const invalidated_token = new InvalidatedToken({ token: token, expiresAt: exp });
+  await invalidated_token.save();
+}
+async function verifyToken(req, res, next) {
   const token = req.headers["authorization"];
 
   if (!token) {
     return res.status(403).json({ message: "Token is required" });
+  }
+  const invalidToken = await InvalidatedToken.findOne({ token });
+  if (invalidToken) {
+    return res.status(401).json({ message: "Invalid token" });
   }
   jwt.verify(token, SECRET_KEY, (err, decoded) => {
     if (err) {
@@ -119,6 +126,8 @@ function verifyToken(req, res, next) {
     next();
   });
 }
+
+
 module.exports = {
   signUp,
   logIn,

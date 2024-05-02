@@ -2,7 +2,7 @@ const { response } = require('express');
 const { logIn } = require('../user/controller');
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const User = require("../user/model");
+const {User} = require("../user/model");
 
 // Mocking dependencies
 jest.mock('../user/model');
