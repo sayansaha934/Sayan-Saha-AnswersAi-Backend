@@ -19,3 +19,8 @@ OPENAI_API_KEY=
 ```
 docker-compose up -d
 ```
+## Run tests
+
+```
+npm test
+```
